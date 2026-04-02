@@ -191,9 +191,9 @@ export default function Chat() {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                <img src={vaijanMascot} alt="ভাইজান" className="w-24 h-24 object-contain" />
+              <img src={vaijanMascot} alt="দেশি ভাই" className="w-24 h-24 object-contain" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">👋 সালাম, আমি ভাইজান AI—তোমার একদম নিজের ভাই!</h2>
+              <h2 className="text-2xl font-bold mb-2">👋 সালাম, আমি দেশি ভাই - AI—তোমার একদম নিজের ভাই!</h2>
               <p className="text-muted-foreground max-w-lg">
                 তোর মুডে, তোর স্টাইলে আমি আছি। মজা, গম্ভীরতা, বা একটু চিন্তা—যে রকম দরকার, ঠিক সে রকম।
               </p>
