@@ -19,12 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import MoodTags from '@/components/MoodTags';
-import ChatMessage from '@/components/ChatMessage';
-import ChatInput from '@/components/ChatInput';
-import UserMenu from '@/components/UserMenu';
-import { supabase } from '@/integrations/supabase/client';
-import vaijanMascot from '@/assets/vaijan-mascot.png';
 
 interface Message {
   role: 'user' | 'assistant';
