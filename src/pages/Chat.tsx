@@ -3,12 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ChatSidebar from '@/components/ChatSidebar';
-import MoodTags from '@/components/MoodTags';
+import MoodTags, { MOOD_TAGS } from '@/components/MoodTags';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import UserMenu from '@/components/UserMenu';
 import { supabase } from '@/integrations/supabase/client';
 import vaijanMascot from '@/assets/vaijan-mascot.png';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -42,7 +52,25 @@ export default function Chat() {
   const [activeMood, setActiveMood] = useState('bhai-radar');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [pendingMood, setPendingMood] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleMoodSelect = (id: string) => {
+    if (id === activeMood) return;
+    if (messages.length > 0) {
+      setPendingMood(id);
+    } else {
+      setActiveMood(id);
+    }
+  };
+
+  const confirmMoodSwitch = () => {
+    if (pendingMood) {
+      setActiveMood(pendingMood);
+      setMessages([]);
+      setPendingMood(null);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');
@@ -146,7 +174,7 @@ export default function Chat() {
         </div>
 
         {/* Mood Tags */}
-        <MoodTags activeTag={activeMood} onSelect={setActiveMood} />
+        <MoodTags activeTag={activeMood} onSelect={handleMoodSelect} />
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-6">
@@ -173,6 +201,22 @@ export default function Chat() {
 
         <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
+
+      {/* Mood Switch Confirmation Dialog */}
+      <AlertDialog open={!!pendingMood} onOpenChange={(open) => !open && setPendingMood(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>মোড পরিবর্তন করবে? 🔄</AlertDialogTitle>
+            <AlertDialogDescription>
+              নতুন মোডে যেতে চাইলে বর্তমান চ্যাট হিস্ট্রি মুছে যাবে। তুমি কি "{MOOD_TAGS.find(t => t.id === pendingMood)?.emoji} {MOOD_TAGS.find(t => t.id === pendingMood)?.label}" মোডে যেতে চাও?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না, থাক</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmMoodSwitch}>হ্যাঁ, পরিবর্তন করো</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
