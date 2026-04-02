@@ -15,7 +15,7 @@ const optionItems = [
   { icon: Home, label: 'হোম', path: '/' },
   { icon: Settings, label: 'সেটিংস', path: '/settings' },
   { icon: Facebook, label: 'ফেসবুক গ্রুপ', path: '#', external: true },
-  { icon: Users, label: 'টিম ভাইজান AI', path: '/team' },
+  { icon: Users, label: 'টিম দেশি ভাই - AI', path: '/team' },
 ];
 
 export default function ChatSidebar({ collapsed, onToggle }: ChatSidebarProps) {
@@ -24,7 +24,7 @@ export default function ChatSidebar({ collapsed, onToggle }: ChatSidebarProps) {
   return (
     <aside className={`flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 ${collapsed ? 'w-0 overflow-hidden' : 'w-64'}`}>
       <div className="flex items-center justify-between p-4">
-        <h1 className="text-xl font-bold text-primary">ভাইজান AI</h1>
+        <h1 className="text-xl font-bold text-primary">দেশি ভাই - AI</h1>
         <button onClick={onToggle} className="text-muted-foreground hover:text-foreground">
           <PanelLeftClose className="w-5 h-5" />
         </button>
@@ -69,7 +69,7 @@ export default function ChatSidebar({ collapsed, onToggle }: ChatSidebarProps) {
 
       <div className="mt-auto p-4">
         <div className="bg-card rounded-xl p-4 border border-border">
-          <img src={vaijanTea} alt="ভাইজান" className="w-24 h-24 mx-auto mb-2 object-contain" loading="lazy" />
+          <img src={vaijanTea} alt="দেশি ভাই" className="w-24 h-24 mx-auto mb-2 object-contain" loading="lazy" />
           <h3 className="font-semibold text-center">এক কাপ চা! ☕</h3>
           <p className="text-xs text-muted-foreground text-center mt-1">
             ভাই, একটু চায়ের পয়সা দে! আমি তোর সাথে সবসময় আড্ডা দিচ্ছি, একটু সাপোর্ট করলে পুরা দেশি মুডে আরো মজা হবে! 😇

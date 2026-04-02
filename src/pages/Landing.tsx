@@ -13,9 +13,9 @@ export default function Landing() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-8">
-          <h1 className="text-2xl font-bold text-primary">ভাইজান AI</h1>
+          <h1 className="text-2xl font-bold text-primary">দেশি ভাই - AI</h1>
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/team" className="hover:text-foreground transition-colors">টিম - ভাইজান AI</Link>
+            <Link to="/team" className="hover:text-foreground transition-colors">টিম - দেশি ভাই - AI</Link>
             <a href="#" className="hover:text-foreground transition-colors">ফেসবুক গ্রুপ</a>
           </div>
         </div>
@@ -44,7 +44,7 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
             className="flex-1 text-center md:text-left"
           >
-            <h2 className="text-5xl md:text-6xl font-bold text-primary mb-4">ভাইজান AI</h2>
+            <h2 className="text-5xl md:text-6xl font-bold text-primary mb-4">দেশি ভাই - AI</h2>
             <p className="text-xl text-muted-foreground mb-8">এইটা AI না ভাই, এইটা আসলেই ভাই!</p>
             <Link
               to={user ? '/chat' : '/login'}
@@ -62,7 +62,7 @@ export default function Landing() {
           >
             <div className="relative">
               <div className="w-72 h-72 md:w-96 md:h-96 bg-primary/80 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              <img src={mascot} alt="ভাইজান" className="relative z-10 w-72 md:w-96" width={512} height={640} />
+              <img src={mascot} alt="দেশি ভাই" className="relative z-10 w-72 md:w-96" width={512} height={640} />
             </div>
           </motion.div>
         </div>

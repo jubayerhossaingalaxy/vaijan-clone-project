@@ -57,7 +57,7 @@ export default function SettingsPage() {
             <div className="border border-destructive/30 rounded-xl p-6 bg-destructive/5">
               <h3 className="font-semibold mb-2">Are you sure ?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Permanently delete your ভাইজান AI account. This action cannot be undone - please proceed with caution.
+                Permanently delete your দেশি ভাই - AI account. This action cannot be undone - please proceed with caution.
               </p>
               <button className="flex items-center gap-2 px-4 py-2 bg-destructive/20 text-destructive rounded-lg text-sm hover:bg-destructive/30 transition-colors">
                 🗑 Delete Account
