@@ -204,7 +204,7 @@ export default function Chat() {
           ))}
           {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
             <div className="flex items-center gap-2 text-muted-foreground text-sm animate-pulse-glow">
-              ভাইজান ভাবছে...
+              দেশি ভাই ভাবছে...
             </div>
           )}
         </div>

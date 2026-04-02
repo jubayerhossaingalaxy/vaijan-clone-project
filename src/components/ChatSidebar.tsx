@@ -69,7 +69,7 @@ export default function ChatSidebar({ collapsed, onToggle }: ChatSidebarProps) {
 
       <div className="mt-auto p-4">
         <div className="bg-card rounded-xl p-4 border border-border">
-          <img src={vaijanTea} alt="ভাইজান" className="w-24 h-24 mx-auto mb-2 object-contain" loading="lazy" />
+          <img src={vaijanTea} alt="দেশি ভাই" className="w-24 h-24 mx-auto mb-2 object-contain" loading="lazy" />
           <h3 className="font-semibold text-center">এক কাপ চা! ☕</h3>
           <p className="text-xs text-muted-foreground text-center mt-1">
             ভাই, একটু চায়ের পয়সা দে! আমি তোর সাথে সবসময় আড্ডা দিচ্ছি, একটু সাপোর্ট করলে পুরা দেশি মুডে আরো মজা হবে! 😇
