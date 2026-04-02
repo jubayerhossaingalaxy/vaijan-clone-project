@@ -29,7 +29,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="ভাইজান সব জানে, জিজ্ঞাসা করেই দেখনা..."
+          placeholder="দেশি ভাই সব জানে, জিজ্ঞাসা করেই দেখনা..."
           className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm py-2"
           disabled={disabled}
         />
