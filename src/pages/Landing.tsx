@@ -44,7 +44,7 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
             className="flex-1 text-center md:text-left"
           >
-            <h2 className="text-5xl md:text-6xl font-bold text-primary mb-4">ভাইজান AI</h2>
+            <h2 className="text-5xl md:text-6xl font-bold text-primary mb-4">দেশি ভাই - AI</h2>
             <p className="text-xl text-muted-foreground mb-8">এইটা AI না ভাই, এইটা আসলেই ভাই!</p>
             <Link
               to={user ? '/chat' : '/login'}
