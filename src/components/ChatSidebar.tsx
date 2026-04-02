@@ -15,7 +15,7 @@ const optionItems = [
   { icon: Home, label: 'হোম', path: '/' },
   { icon: Settings, label: 'সেটিংস', path: '/settings' },
   { icon: Facebook, label: 'ফেসবুক গ্রুপ', path: '#', external: true },
-  { icon: Users, label: 'টিম ভাইজান AI', path: '/team' },
+  { icon: Users, label: 'টিম দেশি ভাই - AI', path: '/team' },
 ];
 
 export default function ChatSidebar({ collapsed, onToggle }: ChatSidebarProps) {
