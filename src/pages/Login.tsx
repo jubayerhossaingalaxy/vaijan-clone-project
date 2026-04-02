@@ -17,7 +17,7 @@ export default function Login() {
       </Link>
 
       <div className="w-full max-w-md text-center">
-        <h1 className="text-3xl font-bold text-primary mb-2">Welcome to ভাইজান AI</h1>
+        <h1 className="text-3xl font-bold text-primary mb-2">Welcome to দেশি ভাই - AI</h1>
         <p className="text-primary/70 mb-8">গুগল একাউন্ট দিয়ে লগিন করা যাবে।</p>
 
         <button

@@ -23,9 +23,9 @@ export default function Team() {
     <div className="min-h-screen bg-background">
       <nav className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-8">
-          <Link to="/" className="text-2xl font-bold text-primary">ভাইজান AI</Link>
+          <Link to="/" className="text-2xl font-bold text-primary">দেশি ভাই - AI</Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/team" className="text-foreground">টিম - ভাইজান AI</Link>
+            <Link to="/team" className="text-foreground">টিম - দেশি ভাই - AI</Link>
             <a href="#" className="hover:text-foreground transition-colors">ফেসবুক গ্রুপ</a>
           </div>
         </div>
