@@ -58,7 +58,25 @@ export default function Chat() {
   const [activeMood, setActiveMood] = useState('bhai-radar');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [pendingMood, setPendingMood] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleMoodSelect = (id: string) => {
+    if (id === activeMood) return;
+    if (messages.length > 0) {
+      setPendingMood(id);
+    } else {
+      setActiveMood(id);
+    }
+  };
+
+  const confirmMoodSwitch = () => {
+    if (pendingMood) {
+      setActiveMood(pendingMood);
+      setMessages([]);
+      setPendingMood(null);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');
