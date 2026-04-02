@@ -201,6 +201,22 @@ export default function Chat() {
 
         <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
+
+      {/* Mood Switch Confirmation Dialog */}
+      <AlertDialog open={!!pendingMood} onOpenChange={(open) => !open && setPendingMood(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>মোড পরিবর্তন করবে? 🔄</AlertDialogTitle>
+            <AlertDialogDescription>
+              নতুন মোডে যেতে চাইলে বর্তমান চ্যাট হিস্ট্রি মুছে যাবে। তুমি কি "{MOOD_TAGS.find(t => t.id === pendingMood)?.emoji} {MOOD_TAGS.find(t => t.id === pendingMood)?.label}" মোডে যেতে চাও?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না, থাক</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmMoodSwitch}>হ্যাঁ, পরিবর্তন করো</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
