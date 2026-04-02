@@ -12,6 +12,16 @@ const MOOD_TAGS: MoodTag[] = [
   { id: 'thatta', label: 'ঠাট্টা', emoji: '😜' },
   { id: 'golpo', label: 'গল্প', emoji: '📚' },
   { id: 'deep-thinking', label: 'ডিপ থিংকিং', emoji: '🧠' },
+  { id: 'romantic', label: 'রোমান্টিক', emoji: '💕' },
+  { id: 'motivation', label: 'মোটিভেশন', emoji: '💪' },
+  { id: 'coding-help', label: 'কোডিং হেল্প', emoji: '💻' },
+  { id: 'roast', label: 'রোস্ট', emoji: '🔥' },
+  { id: 'shayari', label: 'শায়েরি', emoji: '🌹' },
+  { id: 'career', label: 'ক্যারিয়ার', emoji: '🎯' },
+  { id: 'health', label: 'স্বাস্থ্য', emoji: '🏥' },
+  { id: 'study', label: 'পড়াশোনা', emoji: '📖' },
+  { id: 'news', label: 'খবর', emoji: '📰' },
+  { id: 'religion', label: 'ধর্মীয়', emoji: '🕌' },
 ];
 
 interface MoodTagsProps {
