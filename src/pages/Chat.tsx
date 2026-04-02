@@ -174,7 +174,7 @@ export default function Chat() {
         </div>
 
         {/* Mood Tags */}
-        <MoodTags activeTag={activeMood} onSelect={setActiveMood} />
+        <MoodTags activeTag={activeMood} onSelect={handleMoodSelect} />
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-6">
