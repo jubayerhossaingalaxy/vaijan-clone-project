@@ -24,7 +24,7 @@ export default function ChatSidebar({ collapsed, onToggle }: ChatSidebarProps) {
   return (
     <aside className={`flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 ${collapsed ? 'w-0 overflow-hidden' : 'w-64'}`}>
       <div className="flex items-center justify-between p-4">
-        <h1 className="text-xl font-bold text-primary">ভাইজান AI</h1>
+        <h1 className="text-xl font-bold text-primary">দেশি ভাই - AI</h1>
         <button onClick={onToggle} className="text-muted-foreground hover:text-foreground">
           <PanelLeftClose className="w-5 h-5" />
         </button>
