@@ -13,9 +13,9 @@ export default function Landing() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-8">
-          <h1 className="text-2xl font-bold text-primary">ভাইজান AI</h1>
+          <h1 className="text-2xl font-bold text-primary">দেশি ভাই - AI</h1>
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/team" className="hover:text-foreground transition-colors">টিম - ভাইজান AI</Link>
+            <Link to="/team" className="hover:text-foreground transition-colors">টিম - দেশি ভাই - AI</Link>
             <a href="#" className="hover:text-foreground transition-colors">ফেসবুক গ্রুপ</a>
           </div>
         </div>
