@@ -42,6 +42,18 @@ const MOOD_TAGS: MoodTag[] = [
   { id: 'fashion', label: 'ফ্যাশন', emoji: '👗' },
   { id: 'tech-review', label: 'টেক রিভিউ', emoji: '📱' },
   { id: 'storytelling', label: 'গল্প লেখা', emoji: '✍️' },
+  { id: 'memes', label: 'মিমস', emoji: '🤣' },
+  { id: 'exam-tips', label: 'পরীক্ষা টিপস', emoji: '📝' },
+  { id: 'politics', label: 'রাজনীতি', emoji: '🏛️' },
+  { id: 'pet-care', label: 'পোষা প্রাণী', emoji: '🐱' },
+  { id: 'gardening', label: 'বাগান', emoji: '🌱' },
+  { id: 'meditation', label: 'মেডিটেশন', emoji: '🧘' },
+  { id: 'language', label: 'ভাষা শেখা', emoji: '🗣️' },
+  { id: 'horror', label: 'ভৌতিক গল্প', emoji: '👻' },
+  { id: 'art', label: 'আর্ট-ড্রয়িং', emoji: '🎨' },
+  { id: 'finance', label: 'টাকা-পয়সা', emoji: '🏦' },
+  { id: 'cricket', label: 'ক্রিকেট', emoji: '🏏' },
+  { id: 'environmental', label: 'পরিবেশ', emoji: '🌍' },
 ];
 
 interface MoodTagsProps {
