@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useChatHistory } from '@/hooks/useChatHistory';
 import ChatSidebar from '@/components/ChatSidebar';
 import MoodTags, { MOOD_TAGS } from '@/components/MoodTags';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import UserMenu from '@/components/UserMenu';
-import { supabase } from '@/integrations/supabase/client';
 import vaijanMascot from '@/assets/vaijan-mascot.png';
 import {
   AlertDialog,
@@ -86,6 +86,12 @@ export default function Chat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [pendingMood, setPendingMood] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const currentSessionIdRef = useRef<string | null>(null);
+
+  const {
+    sessions, activeSessionId, setActiveSessionId,
+    createSession, saveMessage, loadMessages, deleteSession, getSessionMood, loadSessions,
+  } = useChatHistory();
 
   const handleMoodSelect = (id: string) => {
     if (id === activeMood) return;
@@ -100,9 +106,35 @@ export default function Chat() {
     if (pendingMood) {
       setActiveMood(pendingMood);
       setMessages([]);
+      currentSessionIdRef.current = null;
+      setActiveSessionId(null);
       setPendingMood(null);
     }
   };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    currentSessionIdRef.current = null;
+    setActiveSessionId(null);
+    setActiveMood('bhai-radar');
+  };
+
+  const handleSelectSession = useCallback(async (sessionId: string) => {
+    setActiveSessionId(sessionId);
+    currentSessionIdRef.current = sessionId;
+    const mood = getSessionMood(sessionId);
+    setActiveMood(mood);
+    const msgs = await loadMessages(sessionId);
+    setMessages(msgs);
+  }, [setActiveSessionId, getSessionMood, loadMessages]);
+
+  const handleDeleteSession = useCallback(async (sessionId: string) => {
+    await deleteSession(sessionId);
+    if (currentSessionIdRef.current === sessionId) {
+      setMessages([]);
+      currentSessionIdRef.current = null;
+    }
+  }, [deleteSession]);
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');
@@ -117,6 +149,18 @@ export default function Chat() {
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
     setIsStreaming(true);
+
+    // Create session if first message
+    let sessionId = currentSessionIdRef.current;
+    if (!sessionId) {
+      sessionId = await createSession(activeMood, input);
+      currentSessionIdRef.current = sessionId;
+    }
+
+    // Save user message
+    if (sessionId) {
+      await saveMessage(sessionId, 'user', input);
+    }
 
     let assistantContent = '';
 
@@ -179,6 +223,12 @@ export default function Chat() {
           }
         }
       }
+
+      // Save assistant response
+      if (sessionId && assistantContent) {
+        await saveMessage(sessionId, 'assistant', assistantContent);
+        loadSessions();
+      }
     } catch (err: any) {
       console.error('Chat error:', err);
       setMessages((prev) => [...prev, { role: 'assistant', content: 'ভাই, একটু সমস্যা হয়েছে। আবার চেষ্টা করো! 😅' }]);
@@ -191,10 +241,17 @@ export default function Chat() {
 
   return (
     <div className="h-screen flex bg-background overflow-hidden">
-      <ChatSidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(false)} />
+      <ChatSidebar
+        collapsed={!sidebarOpen}
+        onToggle={() => setSidebarOpen(false)}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onNewChat={handleNewChat}
+        onDeleteSession={handleDeleteSession}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground hover:text-foreground mr-3">
@@ -205,15 +262,13 @@ export default function Chat() {
           <UserMenu />
         </div>
 
-        {/* Mood Tags */}
         <MoodTags activeTag={activeMood} onSelect={handleMoodSelect} />
 
-        {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-6">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-              <img src={vaijanMascot} alt="দেশি ভাই" className="w-24 h-24 object-contain" />
+                <img src={vaijanMascot} alt="দেশি ভাই" className="w-24 h-24 object-contain" />
               </div>
               <h2 className="text-2xl font-bold mb-2">👋 সালাম, আমি দেশি ভাই - AI—তোমার একদম নিজের ভাই!</h2>
               <p className="text-muted-foreground max-w-lg">
@@ -234,7 +289,6 @@ export default function Chat() {
         <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
 
-      {/* Mood Switch Confirmation Dialog */}
       <AlertDialog open={!!pendingMood} onOpenChange={(open) => !open && setPendingMood(null)}>
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>

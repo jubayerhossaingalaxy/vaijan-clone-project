@@ -20,7 +20,7 @@ export default function SettingsPage() {
 
   return (
     <div className="h-screen flex bg-background overflow-hidden">
-      <ChatSidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(false)} />
+      <ChatSidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(false)} sessions={[]} activeSessionId={null} onSelectSession={() => {}} onNewChat={() => {}} onDeleteSession={() => {}} />
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           {!sidebarOpen && (
