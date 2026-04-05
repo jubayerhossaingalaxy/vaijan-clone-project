@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useChatHistory } from '@/hooks/useChatHistory';
 import ChatSidebar from '@/components/ChatSidebar';
 import MoodTags, { MOOD_TAGS } from '@/components/MoodTags';
 import ChatMessage from '@/components/ChatMessage';
@@ -86,12 +85,6 @@ export default function Chat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [pendingMood, setPendingMood] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const currentSessionIdRef = useRef<string | null>(null);
-
-  const {
-    sessions, activeSessionId, setActiveSessionId,
-    createSession, saveMessage, loadMessages, deleteSession, getSessionMood, loadSessions,
-  } = useChatHistory();
 
   const handleMoodSelect = (id: string) => {
     if (id === activeMood) return;
@@ -106,35 +99,14 @@ export default function Chat() {
     if (pendingMood) {
       setActiveMood(pendingMood);
       setMessages([]);
-      currentSessionIdRef.current = null;
-      setActiveSessionId(null);
       setPendingMood(null);
     }
   };
 
   const handleNewChat = () => {
     setMessages([]);
-    currentSessionIdRef.current = null;
-    setActiveSessionId(null);
     setActiveMood('bhai-radar');
   };
-
-  const handleSelectSession = useCallback(async (sessionId: string) => {
-    setActiveSessionId(sessionId);
-    currentSessionIdRef.current = sessionId;
-    const mood = getSessionMood(sessionId);
-    setActiveMood(mood);
-    const msgs = await loadMessages(sessionId);
-    setMessages(msgs);
-  }, [setActiveSessionId, getSessionMood, loadMessages]);
-
-  const handleDeleteSession = useCallback(async (sessionId: string) => {
-    await deleteSession(sessionId);
-    if (currentSessionIdRef.current === sessionId) {
-      setMessages([]);
-      currentSessionIdRef.current = null;
-    }
-  }, [deleteSession]);
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');
@@ -149,18 +121,6 @@ export default function Chat() {
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
     setIsStreaming(true);
-
-    // Create session if first message
-    let sessionId = currentSessionIdRef.current;
-    if (!sessionId) {
-      sessionId = await createSession(activeMood, input);
-      currentSessionIdRef.current = sessionId;
-    }
-
-    // Save user message
-    if (sessionId) {
-      await saveMessage(sessionId, 'user', input);
-    }
 
     let assistantContent = '';
 
@@ -223,12 +183,6 @@ export default function Chat() {
           }
         }
       }
-
-      // Save assistant response
-      if (sessionId && assistantContent) {
-        await saveMessage(sessionId, 'assistant', assistantContent);
-        loadSessions();
-      }
     } catch (err: any) {
       console.error('Chat error:', err);
       setMessages((prev) => [...prev, { role: 'assistant', content: 'ভাই, একটু সমস্যা হয়েছে। আবার চেষ্টা করো! 😅' }]);
@@ -244,11 +198,7 @@ export default function Chat() {
       <ChatSidebar
         collapsed={!sidebarOpen}
         onToggle={() => setSidebarOpen(false)}
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onSelectSession={handleSelectSession}
         onNewChat={handleNewChat}
-        onDeleteSession={handleDeleteSession}
       />
 
       <div className="flex-1 flex flex-col min-w-0">

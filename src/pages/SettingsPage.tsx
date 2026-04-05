@@ -20,7 +20,7 @@ export default function SettingsPage() {
 
   return (
     <div className="h-screen flex bg-background overflow-hidden">
-      <ChatSidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(false)} sessions={[]} activeSessionId={null} onSelectSession={() => {}} onNewChat={() => {}} onDeleteSession={() => {}} />
+      <ChatSidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(false)} onNewChat={() => navigate('/chat')} />
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           {!sidebarOpen && (
@@ -28,42 +28,38 @@ export default function SettingsPage() {
               <PanelLeftOpen className="w-5 h-5" />
             </button>
           )}
+          <h2 className="text-lg font-semibold">সেটিংস ⚙️</h2>
           <div className="flex-1" />
           <UserMenu />
         </div>
-
-        <div className="flex-1 overflow-y-auto p-8 max-w-3xl">
-          <h1 className="text-3xl font-bold mb-2">Settings</h1>
-          <p className="text-muted-foreground mb-8">Manage account and website settings.</p>
-
-          <section className="mb-10">
-            <h2 className="text-xl font-bold mb-1">Your Name</h2>
-            <p className="text-muted-foreground text-sm mb-4">Please enter a display name you are comfortable with.</p>
-            <div className="flex gap-3">
-              <input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                maxLength={32}
-                className="flex-1 bg-secondary border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button className="px-6 py-2 bg-secondary text-muted-foreground rounded-lg text-sm">Save Changes</button>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-lg mx-auto space-y-6">
+            <div className="bg-card rounded-xl p-6 border border-border">
+              <h3 className="font-semibold mb-4">প্রোফাইল</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-muted-foreground">ইমেইল</label>
+                  <p className="text-foreground">{user?.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground">নাম</label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="w-full mt-1 px-3 py-2 bg-background border border-border rounded-lg text-foreground"
+                    placeholder="তোমার নাম"
+                  />
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Max 32 characters</p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold mb-1">Delete Account</h2>
-            <p className="text-muted-foreground text-sm mb-4">This is a danger zone - Be careful !</p>
-            <div className="border border-destructive/30 rounded-xl p-6 bg-destructive/5">
-              <h3 className="font-semibold mb-2">Are you sure ?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Permanently delete your দেশি ভাই - AI account. This action cannot be undone - please proceed with caution.
-              </p>
-              <button className="flex items-center gap-2 px-4 py-2 bg-destructive/20 text-destructive rounded-lg text-sm hover:bg-destructive/30 transition-colors">
-                🗑 Delete Account
-              </button>
-            </div>
-          </section>
+            <button
+              onClick={signOut}
+              className="w-full py-3 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors"
+            >
+              লগ আউট
+            </button>
+          </div>
         </div>
       </div>
     </div>
