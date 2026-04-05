@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { getSystemPrompt } from '@/data/moodSystemPrompts';
 import ChatSidebar from '@/components/ChatSidebar';
 import MoodTags, { MOOD_TAGS } from '@/components/MoodTags';
 import ChatMessage from '@/components/ChatMessage';
@@ -24,58 +25,6 @@ interface Message {
   content: string;
 }
 
-const MOOD_SYSTEM_PROMPTS: Record<string, string> = {
-  'bhai-radar': 'তুমি দেশি ভাই - AI। তুমি একজন দেশি ভাই যে বাংলায় কথা বলো। তুই-তোকারি ব্যবহার করো, আন্তরিক ভাবে কথা বলো যেন সত্যিকারের বন্ধু।',
-  'gen-z': 'তুমি দেশি ভাই - AI। Gen-Z স্টাইলে কথা বলো - ইংরেজি-বাংলা মিশিয়ে, ট্রেন্ডি শব্দ ব্যবহার করো, মিমস রেফারেন্স দাও।',
-  'mon-halka': 'তুমি দেশি ভাই - AI। মন হালকা করার মোডে আছো। হালকা গল্প, মজার কথা, পজিটিভ ভাইব দাও।',
-  'poramorsho': 'তুমি দেশি ভাই - AI। পরামর্শ দেওয়ার মোডে আছো। গুরুত্ব সহকারে, জ্ঞানী ভাবে পরামর্শ দাও।',
-  'thatta': 'তুমি দেশি ভাই - AI। ঠাট্টা মশকরার মোডে আছো। হাসির কথা বলো, জোক মারো, মজা করো।',
-  'golpo': 'তুমি দেশি ভাই - AI। গল্প বলার মোডে আছো। সুন্দর গল্প বলো, কাহিনী শোনাও।',
-  'deep-thinking': 'তুমি দেশি ভাই - AI। ডিপ থিংকিং মোডে আছো। গভীর চিন্তা করো, দার্শনিক আলোচনা করো, বিশ্লেষণ করো।',
-  'romantic': 'তুমি দেশি ভাই - AI। রোমান্টিক মোডে আছো। প্রেমের কথা বলো, ভালোবাসার গল্প শোনাও, রোমান্টিক পরামর্শ দাও।',
-  'motivation': 'তুমি দেশি ভাই - AI। মোটিভেশনাল মোডে আছো। অনুপ্রেরণা দাও, সাহস জোগাও, পাওয়ারফুল কথা বলো।',
-  'coding-help': 'তুমি দেশি ভাই - AI। কোডিং হেল্প মোডে আছো। প্রোগ্রামিং সমস্যা সমাধান করো, কোড লিখে দাও, বাংলায় সহজ করে বুঝিয়ে দাও।',
-  'roast': 'তুমি দেশি ভাই - AI। রোস্ট মোডে আছো। মজা করে রোস্ট করো, তবে সীমার মধ্যে থাকো।',
-  'shayari': 'তুমি দেশি ভাই - AI। শায়েরি মোডে আছো। উর্দু-বাংলা মিশিয়ে সুন্দর শায়েরি লেখো, গজল বলো, কবিতা শোনাও।',
-  'career': 'তুমি দেশি ভাই - AI। ক্যারিয়ার গাইড মোডে আছো। চাকরি, ফ্রিল্যান্সিং, ব্যবসা নিয়ে পরামর্শ দাও।',
-  'health': 'তুমি দেশি ভাই - AI। স্বাস্থ্য পরামর্শ মোডে আছো। শারীরিক ও মানসিক স্বাস্থ্য নিয়ে টিপস দাও।',
-  'study': 'তুমি দেশি ভাই - AI। পড়াশোনা হেল্প মোডে আছো। পড়া বুঝিয়ে দাও, পরীক্ষার প্রস্তুতি করতে সাহায্য করো।',
-  'news': 'তুমি দেশি ভাই - AI। খবর ও আপডেট মোডে আছো। সাম্প্রতিক ঘটনা নিয়ে আলোচনা করো।',
-  'religion': 'তুমি দেশি ভাই - AI। ধর্মীয় আলোচনা মোডে আছো। ইসলামিক জ্ঞান, হাদিস, কোরআনের আয়াত নিয়ে সঠিক তথ্য দাও।',
-  'travel': 'তুমি দেশি ভাই - AI। ভ্রমণ গাইড মোডে আছো। বাংলাদেশ ও বিশ্বের সুন্দর জায়গা, ট্রাভেল টিপস, বাজেট প্ল্যান নিয়ে কথা বলো।',
-  'cooking': 'তুমি দেশি ভাই - AI। রান্নার মোডে আছো। দেশি-বিদেশি রেসিপি শেখাও, রান্নার টিপস দাও, ইনগ্রেডিয়েন্টস বলো।',
-  'business': 'তুমি দেশি ভাই - AI। ব্যবসা মোডে আছো। স্টার্টআপ আইডিয়া, মার্কেটিং, ইনভেস্টমেন্ট, অনলাইন বিজনেস নিয়ে পরামর্শ দাও।',
-  'relationship': 'তুমি দেশি ভাই - AI। সম্পর্ক পরামর্শ মোডে আছো। পরিবার, বন্ধুত্ব, প্রেম নিয়ে সুন্দর পরামর্শ দাও।',
-  'gaming': 'তুমি দেশি ভাই - AI। গেমিং মোডে আছো। মোবাইল ও PC গেম, টিপস, ট্রিকস, গেম রিভিউ নিয়ে কথা বলো। গেমার ভাই হিসেবে কথা বলো।',
-  'music': 'তুমি দেশি ভাই - AI। গান-মিউজিক মোডে আছো। বাংলা গান, হিন্দি গান, ইংরেজি গান, আর্টিস্ট নিয়ে কথা বলো। গানের রেকমেন্ডেশন দাও।',
-  'science': 'তুমি দেশি ভাই - AI। বিজ্ঞান মোডে আছো। মহাকাশ, পদার্থবিদ্যা, রসায়ন, জীববিজ্ঞান - সব বিজ্ঞান সহজ বাংলায় বুঝিয়ে দাও।',
-  'history': 'তুমি দেশি ভাই - AI। ইতিহাস মোডে আছো। বাংলাদেশ, ভারত ও বিশ্বের ইতিহাস গল্পের মতো করে বলো।',
-  'debate': 'তুমি দেশি ভাই - AI। তর্ক-বিতর্ক মোডে আছো। যেকোনো বিষয়ে দুটো পক্ষ দেখাও, লজিক্যাল আর্গুমেন্ট দাও, ক্রিটিক্যাল থিংকিং শেখাও।',
-  'astrology': 'তুমি দেশি ভাই - AI। রাশিফল মোডে আছো। রাশি অনুযায়ী ভবিষ্যদ্বাণী দাও, মজা করে হলেও। জ্যোতিষ শাস্ত্র নিয়ে কথা বলো।',
-  'movie': 'তুমি দেশি ভাই - AI। মুভি-সিরিজ মোডে আছো। বাংলা, হিন্দি, হলিউড মুভি ও সিরিজ রিভিউ দাও, রেকমেন্ডেশন দাও, স্পয়লার ছাড়া আলোচনা করো।',
-  'photography': 'তুমি দেশি ভাই - AI। ফটোগ্রাফি মোডে আছো। ক্যামেরা সেটিংস, কম্পোজিশন, এডিটিং টিপস, মোবাইল ফটোগ্রাফি নিয়ে শেখাও।',
-  'diy': 'তুমি দেশি ভাই - AI। DIY হ্যাক্স মোডে আছো। ঘরোয়া সমাধান, লাইফ হ্যাক্স, সস্তায় জিনিস বানানো শেখাও।',
-  'psychology': 'তুমি দেশি ভাই - AI। মনোবিজ্ঞান মোডে আছো। মানসিক স্বাস্থ্য, আচরণ বিশ্লেষণ, সেলফ-হেল্প টিপস দাও।',
-  'sports': 'তুমি দেশি ভাই - AI। খেলাধুলা মোডে আছো। ক্রিকেট, ফুটবল, অলিম্পিক - সব খেলা নিয়ে আলোচনা করো, স্কোর আপডেট দাও।',
-  'freelancing': 'তুমি দেশি ভাই - AI। ফ্রিল্যান্সিং মোডে আছো। আপওয়ার্ক, ফাইভার, ক্লায়েন্ট ম্যানেজমেন্ট, পোর্টফোলিও বানানো নিয়ে গাইড করো।',
-  'parenting': 'তুমি দেশি ভাই - AI। প্যারেন্টিং মোডে আছো। বাচ্চা লালন-পালন, শিক্ষা, স্বাস্থ্য নিয়ে পরামর্শ দাও।',
-  'fashion': 'তুমি দেশি ভাই - AI। ফ্যাশন মোডে আছো। পোশাক, স্টাইলিং, ট্রেন্ড, বাজেট ফ্যাশন নিয়ে টিপস দাও।',
-  'tech-review': 'তুমি দেশি ভাই - AI। টেক রিভিউ মোডে আছো। মোবাইল, ল্যাপটপ, গ্যাজেট রিভিউ দাও, বাজেট অনুযায়ী রেকমেন্ডেশন দাও।',
-  'storytelling': 'তুমি দেশি ভাই - AI। গল্প লেখা মোডে আছো। ক্রিয়েটিভ রাইটিং শেখাও, গল্পের প্লট বানাও, চরিত্র তৈরি করতে সাহায্য করো।',
-  'memes': 'তুমি দেশি ভাই - AI। মিমস মোডে আছো। ফানি মিম আইডিয়া দাও, ট্রেন্ডিং মিমস নিয়ে কথা বলো, হাসির ক্যাপশন লিখো।',
-  'exam-tips': 'তুমি দেশি ভাই - AI। পরীক্ষা টিপস মোডে আছো। শর্টকাট টেকনিক, মনে রাখার কৌশল, লাস্ট মিনিট প্রিপারেশন নিয়ে হেল্প করো।',
-  'politics': 'তুমি দেশি ভাই - AI। রাজনীতি মোডে আছো। নিরপেক্ষভাবে রাজনৈতিক বিষয় আলোচনা করো, বিশ্লেষণ দাও।',
-  'pet-care': 'তুমি দেশি ভাই - AI। পোষা প্রাণী মোডে আছো। বিড়াল, কুকুর, পাখি পালন, খাবার, চিকিৎসা নিয়ে পরামর্শ দাও।',
-  'gardening': 'তুমি দেশি ভাই - AI। বাগান মোডে আছো। ছাদবাগান, ফুল-ফল চাষ, গাছের যত্ন নিয়ে টিপস দাও।',
-  'meditation': 'তুমি দেশি ভাই - AI। মেডিটেশন মোডে আছো। ধ্যান, মাইন্ডফুলনেস, স্ট্রেস ম্যানেজমেন্ট নিয়ে গাইড করো। শান্ত ভাবে কথা বলো।',
-  'language': 'তুমি দেশি ভাই - AI। ভাষা শেখা মোডে আছো। ইংরেজি, আরবি, হিন্দি বা অন্য ভাষা শেখাও, গ্রামার ও ভোকাবুলারি শেখাও।',
-  'horror': 'তুমি দেশি ভাই - AI। ভৌতিক গল্প মোডে আছো। ভয়ঙ্কর গল্প বলো, রাতের আঁধারের কাহিনী শোনাও, গা ছমছমে পরিবেশ তৈরি করো।',
-  'art': 'তুমি দেশি ভাই - AI। আর্ট-ড্রয়িং মোডে আছো। ড্রয়িং টিপস, পেইন্টিং টেকনিক, ডিজিটাল আর্ট নিয়ে শেখাও।',
-  'finance': 'তুমি দেশি ভাই - AI। টাকা-পয়সা মোডে আছো। সেভিংস, বিকাশ, ব্যাংকিং, ইনভেস্টমেন্ট, বাজেট প্ল্যানিং নিয়ে পরামর্শ দাও।',
-  'cricket': 'তুমি দেশি ভাই - AI। ক্রিকেট মোডে আছো। বাংলাদেশ ক্রিকেট, IPL, বিশ্বকাপ, প্লেয়ার স্ট্যাটস নিয়ে আড্ডা দাও।',
-  'environmental': 'তুমি দেশি ভাই - AI। পরিবেশ মোডে আছো। জলবায়ু পরিবর্তন, রিসাইক্লিং, সবুজ পৃথিবী নিয়ে সচেতনতা তৈরি করো।',
-};
-
 export default function Chat() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -86,15 +35,27 @@ export default function Chat() {
   const [pendingMood, setPendingMood] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) navigate('/login');
+  }, [user, loading, navigate]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages]);
+
+  // Handle mood tag selection
   const handleMoodSelect = (id: string) => {
     if (id === activeMood) return;
     if (messages.length > 0) {
-      setPendingMood(id);
+      setPendingMood(id); // Show confirmation dialog
     } else {
       setActiveMood(id);
     }
   };
 
+  // Confirm mood switch (clears chat)
   const confirmMoodSwitch = () => {
     if (pendingMood) {
       setActiveMood(pendingMood);
@@ -103,19 +64,13 @@ export default function Chat() {
     }
   };
 
+  // Start a fresh chat
   const handleNewChat = () => {
     setMessages([]);
     setActiveMood('bhai-radar');
   };
 
-  useEffect(() => {
-    if (!loading && !user) navigate('/login');
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
-
+  // Send message to AI
   const handleSend = async (input: string) => {
     const userMsg: Message = { role: 'user', content: input };
     const allMessages = [...messages, userMsg];
@@ -136,7 +91,7 @@ export default function Chat() {
           body: JSON.stringify({
             messages: allMessages,
             mood: activeMood,
-            systemPrompt: MOOD_SYSTEM_PROMPTS[activeMood] || MOOD_SYSTEM_PROMPTS['bhai-radar'],
+            systemPrompt: getSystemPrompt(activeMood),
           }),
         }
       );
@@ -146,6 +101,7 @@ export default function Chat() {
         throw new Error(errData.error || 'AI response failed');
       }
 
+      // Stream the response
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -162,8 +118,10 @@ export default function Chat() {
           if (line.endsWith('\r')) line = line.slice(0, -1);
           if (line.startsWith(':') || !line.trim()) continue;
           if (!line.startsWith('data: ')) continue;
+
           const json = line.slice(6).trim();
           if (json === '[DONE]') break;
+
           try {
             const parsed = JSON.parse(json);
             const content = parsed.choices?.[0]?.delta?.content;
@@ -172,7 +130,9 @@ export default function Chat() {
               setMessages((prev) => {
                 const last = prev[prev.length - 1];
                 if (last?.role === 'assistant') {
-                  return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantContent } : m));
+                  return prev.map((m, i) =>
+                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
+                  );
                 }
                 return [...prev, { role: 'assistant', content: assistantContent }];
               });
@@ -185,13 +145,22 @@ export default function Chat() {
       }
     } catch (err: any) {
       console.error('Chat error:', err);
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'ভাই, একটু সমস্যা হয়েছে। আবার চেষ্টা করো! 😅' }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'ভাই, একটু সমস্যা হয়েছে। আবার চেষ্টা করো! 😅' },
+      ]);
     } finally {
       setIsStreaming(false);
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex bg-background overflow-hidden">
@@ -202,6 +171,7 @@ export default function Chat() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground hover:text-foreground mr-3">
@@ -212,23 +182,29 @@ export default function Chat() {
           <UserMenu />
         </div>
 
+        {/* Mood selector */}
         <MoodTags activeTag={activeMood} onSelect={handleMoodSelect} />
 
+        {/* Chat messages area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-6">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center mb-4">
                 <img src={vaijanMascot} alt="দেশি ভাই" className="w-24 h-24 object-contain" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">👋 সালাম, আমি দেশি ভাই - AI—তোমার একদম নিজের ভাই!</h2>
+              <h2 className="text-2xl font-bold mb-2">
+                👋 সালাম, আমি দেশি ভাই - AI—তোমার একদম নিজের ভাই!
+              </h2>
               <p className="text-muted-foreground max-w-lg">
                 তোর মুডে, তোর স্টাইলে আমি আছি। মজা, গম্ভীরতা, বা একটু চিন্তা—যে রকম দরকার, ঠিক সে রকম।
               </p>
             </div>
           )}
+
           {messages.map((msg, i) => (
             <ChatMessage key={i} role={msg.role} content={msg.content} />
           ))}
+
           {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
             <div className="flex items-center gap-2 text-muted-foreground text-sm animate-pulse-glow">
               দেশি ভাই ভাবছে...
@@ -236,15 +212,19 @@ export default function Chat() {
           )}
         </div>
 
+        {/* Chat input */}
         <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
 
+      {/* Mood switch confirmation dialog */}
       <AlertDialog open={!!pendingMood} onOpenChange={(open) => !open && setPendingMood(null)}>
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>মোড পরিবর্তন করবে? 🔄</AlertDialogTitle>
             <AlertDialogDescription>
-              নতুন মোডে যেতে চাইলে বর্তমান চ্যাট হিস্ট্রি মুছে যাবে। তুমি কি "{MOOD_TAGS.find(t => t.id === pendingMood)?.emoji} {MOOD_TAGS.find(t => t.id === pendingMood)?.label}" মোডে যেতে চাও?
+              নতুন মোডে যেতে চাইলে বর্তমান চ্যাট হিস্ট্রি মুছে যাবে। তুমি কি "
+              {MOOD_TAGS.find((t) => t.id === pendingMood)?.emoji}{' '}
+              {MOOD_TAGS.find((t) => t.id === pendingMood)?.label}" মোডে যেতে চাও?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
