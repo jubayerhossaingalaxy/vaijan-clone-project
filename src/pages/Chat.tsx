@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PanelLeftOpen } from 'lucide-react';
+import { PanelLeftOpen, Keyboard } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { getSystemPrompt } from '@/data/moodSystemPrompts';
 import ChatSidebar from '@/components/ChatSidebar';
 import MoodTags, { MOOD_TAGS } from '@/components/MoodTags';
 import ChatMessage from '@/components/ChatMessage';
@@ -28,34 +27,48 @@ interface Message {
 export default function Chat() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMood, setActiveMood] = useState('bhai-radar');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [pendingMood, setPendingMood] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Redirect to login if not authenticated
+  // Check screen size for default sidebar state
+  useEffect(() => {
+    setSidebarOpen(window.innerWidth >= 768);
+  }, []);
+
   useEffect(() => {
     if (!loading && !user) navigate('/login');
   }, [user, loading, navigate]);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // Handle mood tag selection
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'n') { e.preventDefault(); handleNewChat(); }
+        if (e.key === '/') { e.preventDefault(); setSidebarOpen((p) => !p); }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   const handleMoodSelect = (id: string) => {
     if (id === activeMood) return;
     if (messages.length > 0) {
-      setPendingMood(id); // Show confirmation dialog
+      setPendingMood(id);
     } else {
       setActiveMood(id);
     }
   };
 
-  // Confirm mood switch (clears chat)
   const confirmMoodSwitch = () => {
     if (pendingMood) {
       setActiveMood(pendingMood);
@@ -64,18 +77,18 @@ export default function Chat() {
     }
   };
 
-  // Start a fresh chat
   const handleNewChat = () => {
     setMessages([]);
     setActiveMood('bhai-radar');
+    setError(null);
   };
 
-  // Send message to AI
-  const handleSend = async (input: string) => {
+  const handleSend = useCallback(async (input: string) => {
     const userMsg: Message = { role: 'user', content: input };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
     setIsStreaming(true);
+    setError(null);
 
     let assistantContent = '';
 
@@ -91,17 +104,17 @@ export default function Chat() {
           body: JSON.stringify({
             messages: allMessages,
             mood: activeMood,
-            systemPrompt: getSystemPrompt(activeMood),
           }),
         }
       );
 
       if (!response.ok || !response.body) {
         const errData = await response.json().catch(() => ({}));
+        if (response.status === 429) throw new Error('rate-limit');
+        if (response.status === 402) throw new Error('payment');
         throw new Error(errData.error || 'AI response failed');
       }
 
-      // Stream the response
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -145,14 +158,46 @@ export default function Chat() {
       }
     } catch (err: any) {
       console.error('Chat error:', err);
+      const errorMsg =
+        err.message === 'rate-limit'
+          ? 'ভাই, অনেক বেশি মেসেজ পাঠাচ্ছো! একটু অপেক্ষা করো। ⏳'
+          : err.message === 'payment'
+          ? 'ভাই, ক্রেডিট শেষ হয়ে গেছে! 💳'
+          : 'ভাই, একটু সমস্যা হয়েছে। আবার চেষ্টা করো! 😅';
+      setError(errorMsg);
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: 'ভাই, একটু সমস্যা হয়েছে। আবার চেষ্টা করো! 😅' },
+        { role: 'assistant', content: errorMsg },
       ]);
     } finally {
       setIsStreaming(false);
     }
-  };
+  }, [messages, activeMood]);
+
+  // Regenerate last response
+  const handleRegenerate = useCallback(() => {
+    if (messages.length < 2) return;
+    // Remove last assistant message, resend last user message
+    const lastUserIdx = messages.map((m) => m.role).lastIndexOf('user');
+    if (lastUserIdx === -1) return;
+    const lastUserMsg = messages[lastUserIdx].content;
+    const newMessages = messages.slice(0, lastUserIdx);
+    setMessages(newMessages);
+    setTimeout(() => handleSend(lastUserMsg), 100);
+  }, [messages, handleSend]);
+
+  // Retry on error
+  const handleRetry = useCallback(() => {
+    if (messages.length < 1) return;
+    const lastUserIdx = messages.map((m) => m.role).lastIndexOf('user');
+    if (lastUserIdx === -1) return;
+    const lastUserMsg = messages[lastUserIdx].content;
+    // Remove error message
+    const newMessages = messages.slice(0, lastUserIdx);
+    setMessages(newMessages);
+    setError(null);
+    setTimeout(() => handleSend(lastUserMsg), 100);
+  }, [messages, handleSend]);
 
   if (loading) {
     return (
@@ -172,13 +217,17 @@ export default function Chat() {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-border">
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground hover:text-foreground mr-3">
               <PanelLeftOpen className="w-5 h-5" />
             </button>
           )}
           <div className="flex-1" />
+          <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground mr-3">
+            <Keyboard className="w-3.5 h-3.5" />
+            <span>Ctrl+N নতুন চ্যাট • Ctrl+/ সাইডবার</span>
+          </div>
           <UserMenu />
         </div>
 
@@ -186,24 +235,46 @@ export default function Chat() {
         <MoodTags activeTag={activeMood} onSelect={handleMoodSelect} />
 
         {/* Chat messages area */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-6">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-3 sm:px-4 py-6">
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                <img src={vaijanMascot} alt="দেশি ভাই" className="w-24 h-24 object-contain" />
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                <img src={vaijanMascot} alt="দেশি ভাই" className="w-20 h-20 sm:w-24 sm:h-24 object-contain" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">
                 👋 সালাম, আমি দেশি ভাই - AI—তোমার একদম নিজের ভাই!
               </h2>
-              <p className="text-muted-foreground max-w-lg">
+              <p className="text-muted-foreground max-w-lg text-sm sm:text-base">
                 তোর মুডে, তোর স্টাইলে আমি আছি। মজা, গম্ভীরতা, বা একটু চিন্তা—যে রকম দরকার, ঠিক সে রকম।
+              </p>
+              <p className="text-xs text-muted-foreground mt-3">
+                ১০০+ মোড থেকে বেছে নাও ☝️ তারপর আড্ডা শুরু করো!
               </p>
             </div>
           )}
 
           {messages.map((msg, i) => (
-            <ChatMessage key={i} role={msg.role} content={msg.content} />
+            <ChatMessage
+              key={i}
+              role={msg.role}
+              content={msg.content}
+              isLast={i === messages.length - 1 && msg.role === 'assistant'}
+              isStreaming={isStreaming && i === messages.length - 1}
+              onRegenerate={handleRegenerate}
+            />
           ))}
+
+          {/* Error retry */}
+          {error && !isStreaming && (
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 bg-destructive/10 text-destructive rounded-lg text-sm hover:bg-destructive/20 transition-colors"
+              >
+                🔄 আবার চেষ্টা করো
+              </button>
+            </div>
+          )}
 
           {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
             <div className="flex items-center gap-2 text-muted-foreground text-sm animate-pulse-glow">

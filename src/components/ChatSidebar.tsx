@@ -1,4 +1,4 @@
-import { PanelLeftClose, Home, Settings, Facebook, Users } from 'lucide-react';
+import { PanelLeftClose, Home, Settings, Facebook, Users, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import vaijanTea from '@/assets/vaijan-tea.png';
 
@@ -19,48 +19,65 @@ export default function ChatSidebar({ collapsed, onToggle, onNewChat }: ChatSide
   const location = useLocation();
 
   return (
-    <aside className={`flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 ${collapsed ? 'w-0 overflow-hidden' : 'w-64'}`}>
-      <div className="flex items-center justify-between p-4">
-        <h1 className="text-xl font-bold text-primary">দেশি ভাই - AI</h1>
-        <button onClick={onToggle} className="text-muted-foreground hover:text-foreground">
-          <PanelLeftClose className="w-5 h-5" />
-        </button>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      {!collapsed && (
+        <div
+          className="fixed inset-0 bg-background/80 z-40 md:hidden"
+          onClick={onToggle}
+        />
+      )}
 
-      <div className="flex-1" />
-
-      {/* Options */}
-      <div className="px-3 py-2 border-t border-sidebar-border">
-        <div className="space-y-0.5">
-          {optionItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.path}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                location.pathname === item.path
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-              }`}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="p-4">
-        <div className="bg-card rounded-xl p-4 border border-border">
-          <img src={vaijanTea} alt="দেশি ভাই" className="w-24 h-24 mx-auto mb-2 object-contain" loading="lazy" />
-          <h3 className="font-semibold text-center">এক কাপ চা! ☕</h3>
-          <p className="text-xs text-muted-foreground text-center mt-1">
-            ভাই, একটু চায়ের পয়সা দে! আমি তোর সাথে সবসময় আড্ডা দিচ্ছি, একটু সাপোর্ট করলে পুরা দেশি মুডে আরো মজা হবে! 😇
-          </p>
-          <button className="w-full mt-3 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors">
-            চায়ের খরচ 🍵
+      <aside
+        className={`flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50
+          ${collapsed ? 'w-0 overflow-hidden' : 'w-64'}
+          ${!collapsed ? 'fixed inset-y-0 left-0 md:relative' : 'md:relative'}
+        `}
+      >
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-xl font-bold text-primary">দেশি ভাই - AI</h1>
+          <button onClick={onToggle} className="text-muted-foreground hover:text-foreground">
+            <PanelLeftClose className="w-5 h-5 hidden md:block" />
+            <X className="w-5 h-5 md:hidden" />
           </button>
         </div>
-      </div>
-    </aside>
+
+        <div className="flex-1" />
+
+        {/* Options */}
+        <div className="px-3 py-2 border-t border-sidebar-border">
+          <div className="space-y-0.5">
+            {optionItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.path}
+                onClick={onToggle}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  location.pathname === item.path
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                }`}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="bg-card rounded-xl p-4 border border-border">
+            <img src={vaijanTea} alt="দেশি ভাই" className="w-24 h-24 mx-auto mb-2 object-contain" loading="lazy" />
+            <h3 className="font-semibold text-center">এক কাপ চা! ☕</h3>
+            <p className="text-xs text-muted-foreground text-center mt-1">
+              ভাই, একটু চায়ের পয়সা দে! আমি তোর সাথে সবসময় আড্ডা দিচ্ছি, একটু সাপোর্ট করলে পুরা দেশি মুডে আরো মজা হবে! 😇
+            </p>
+            <button className="w-full mt-3 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors">
+              চায়ের খরচ 🍵
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
