@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Chat from "./pages/Chat";
+import Dashboard from "./pages/Dashboard";
 import SettingsPage from "./pages/SettingsPage";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/team" element={<Team />} />
