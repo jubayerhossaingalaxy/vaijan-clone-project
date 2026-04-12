@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .face { animation: bounce 2s ease-in-out infinite; transform-origin: center; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    .eye-l, .eye-r { animation: blink 3s ease-in-out infinite; transform-origin: center; }
+    @keyframes blink { 0%,90%,100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+    .wave { animation: waving 1.5s ease-in-out infinite; transform-origin: 48px 28px; }
+    @keyframes waving { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(20deg); } }
+  </style>
+  <circle cx="32" cy="32" r="30" fill="#F59E0B"/>
+  <g class="face">
+    <circle class="eye-l" cx="22" cy="26" r="3.5" fill="#1a1a1a"/>
+    <circle class="eye-r" cx="42" cy="26" r="3.5" fill="#1a1a1a"/>
+    <circle cx="23" cy="24.5" r="1.2" fill="white"/>
+    <circle cx="43" cy="24.5" r="1.2" fill="white"/>
+    <path d="M20 38 Q32 48 44 38" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+  <g class="wave">
+    <path d="M48 28 Q54 20 52 14" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="52" cy="13" r="2" fill="#1a1a1a"/>
+  </g>
+</svg>
